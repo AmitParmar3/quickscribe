@@ -10,6 +10,8 @@ import {
   Languages,
   LucideLanguages,
   Drama,
+  Loader2,
+  CheckCircle,
 } from "lucide-react";
 import {
   Select,
@@ -56,6 +58,11 @@ export default function Home() {
   });
   const videoInputRef = useRef<HTMLInputElement>(null);
   const subtitleInputRef = useRef<HTMLInputElement>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+    const [selectedStyle, setSelectedStyle] = useState("");
+    const [customPrompt, setCustomPrompt] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleDrag = (
     e: React.DragEvent<HTMLDivElement>,
@@ -128,6 +135,21 @@ export default function Home() {
     } else {
       subtitleInputRef.current?.click();
     }
+  };
+   const handleProcess = () => {
+    setIsProcessing(true);
+    setProgress(0);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsProcessing(false);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
   };
 
   return (
@@ -405,7 +427,7 @@ export default function Home() {
           {/* Action Section */}
           <div className="text-center space-y-6">
             <button
-              onClick={handleSubmit}
+              onClick={handleProcess}
               disabled={!videoFile || !subtitleFile}
               className={`group relative px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ${
                 videoFile && subtitleFile
@@ -440,6 +462,29 @@ export default function Home() {
             )}
           </div>
         </div>
+
+
+
+        {isProcessing && (
+          <div className="pt-4 space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Loader2 className="animate-spin w-4 h-4" /> Processing Translation...
+            </div>
+            <div className="w-full h-2 bg-gray-200 rounded">
+              <div
+                className="h-full bg-green-500 rounded transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+            <div className="text-xs text-gray-500">{progress}% complete</div>
+          </div>
+        )}
+
+        {!isProcessing && progress === 100 && (
+          <div className="flex items-center gap-2 text-green-600 text-sm pt-4">
+            <CheckCircle className="w-4 h-4" /> Translation complete!
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center mt-8">
