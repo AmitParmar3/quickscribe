@@ -34,7 +34,7 @@ const styles = [
   "genZ comedy",
   "comedic",
   "funny",
-  "millenial",
+  "millennial",
   "custom",
 ];
 
@@ -344,15 +344,23 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 gap-8 mb-10">
             <div>
-              <Label>
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-xl flex items-center justify-center">
-                  <LucideLanguages className="w-5 h-5 text-indigo-600" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                  <LucideLanguages className="w-5 h-5 text-blue-600" />
                 </div>
-                Select Language
-              </Label>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    Select Language
+                  </h2>
+                  <p className="text-sm text-slate-500 mb-">
+                    Select your output language
+                  </p>
+                </div>
+              </div>
+             
               <Select>
-                <SelectTrigger className="w-full !h-12">
-                  <SelectValue placeholder="Select language..." />
+                <SelectTrigger className="w-full !h-12 mt-4">
+                  <SelectValue placeholder="Select Language" />
                 </SelectTrigger>
                 <SelectContent>
                   {languages.map((lang) => (
@@ -364,21 +372,31 @@ export default function Home() {
               </Select>
             </div>
 
-            <div>
-              <Label>
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-xl flex items-center justify-center">
-                  <Drama className="w-5 h-5 text-indigo-600" />
+           <div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
+                  <Drama className="w-5 h-5 text-blue-600" />
                 </div>
-                Select Style
-              </Label>
+                <div>
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    Select Style
+                  </h2>
+                  <p className="text-sm text-slate-500 mb-">
+                    Select your desired style
+                  </p>
+                </div>
+              </div>
+             
               <Select>
-                <SelectTrigger className="w-full !h-12">
-                  <SelectValue placeholder="Theme" />
+                <SelectTrigger className="w-full !h-12 mt-4" >
+                  <SelectValue placeholder="Select Style" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
+                  {styles.map((styl) => (
+                    <SelectItem key={styl} value={styl}>
+                      {styl}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
