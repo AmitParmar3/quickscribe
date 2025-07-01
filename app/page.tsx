@@ -1,37 +1,83 @@
-"use client"
+"use client";
 import Image from "next/image";
-import { Upload, Video, FileText, X, Check, Sparkles } from 'lucide-react';
+import {
+  Upload,
+  Video,
+  FileText,
+  X,
+  Check,
+  Sparkles,
+  Languages,
+  LucideLanguages,
+  Drama,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRef, useState } from "react";
+import { Label } from "@/components/ui/label";
 
 interface DragActiveState {
   video: boolean;
   subtitle: boolean;
 }
 
-type FileType = 'video' | 'subtitle';
+type FileType = "video" | "subtitle";
+
+const styles = [
+  "sad",
+  "royal",
+  "genZ comedy",
+  "comedic",
+  "funny",
+  "millenial",
+  "custom",
+];
+
+const languages = [
+  "Hindi",
+  "Spanish",
+  "French",
+  "German",
+  "Japanese",
+  "Korean",
+];
 
 export default function Home() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [subtitleFile, setSubtitleFile] = useState<File | null>(null);
-  const [dragActive, setDragActive] = useState<DragActiveState>({ video: false, subtitle: false });
+  const [dragActive, setDragActive] = useState<DragActiveState>({
+    video: false,
+    subtitle: false,
+  });
   const videoInputRef = useRef<HTMLInputElement>(null);
   const subtitleInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>, type: FileType): void => {
+  const handleDrag = (
+    e: React.DragEvent<HTMLDivElement>,
+    type: FileType
+  ): void => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(prev => ({ ...prev, [type]: true }));
+      setDragActive((prev) => ({ ...prev, [type]: true }));
     } else if (e.type === "dragleave") {
-      setDragActive(prev => ({ ...prev, [type]: false }));
+      setDragActive((prev) => ({ ...prev, [type]: false }));
     }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, type: FileType): void => {
+  const handleDrop = (
+    e: React.DragEvent<HTMLDivElement>,
+    type: FileType
+  ): void => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(prev => ({ ...prev, [type]: false }));
-    
+    setDragActive((prev) => ({ ...prev, [type]: false }));
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileSelection(files[0], type);
@@ -39,45 +85,45 @@ export default function Home() {
   };
 
   const handleFileSelection = (file: File, type: FileType): void => {
-    if (type === 'video') {
-      if (file.type.startsWith('video/')) {
+    if (type === "video") {
+      if (file.type.startsWith("video/")) {
         setVideoFile(file);
       }
-    } else if (type === 'subtitle') {
-      if (file.name.endsWith('.srt') || file.name.endsWith('.txt')) {
+    } else if (type === "subtitle") {
+      if (file.name.endsWith(".srt") || file.name.endsWith(".txt")) {
         setSubtitleFile(file);
       }
     }
   };
 
   const removeFile = (type: FileType): void => {
-    if (type === 'video') {
+    if (type === "video") {
       setVideoFile(null);
-      if (videoInputRef.current) videoInputRef.current.value = '';
+      if (videoInputRef.current) videoInputRef.current.value = "";
     } else {
       setSubtitleFile(null);
-      if (subtitleInputRef.current) subtitleInputRef.current.value = '';
+      if (subtitleInputRef.current) subtitleInputRef.current.value = "";
     }
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const handleSubmit = (): void => {
     if (videoFile && subtitleFile) {
-      console.log('Video file:', videoFile);
-      console.log('Subtitle file:', subtitleFile);
+      console.log("Video file:", videoFile);
+      console.log("Subtitle file:", subtitleFile);
       // Handle the file processing here
-      alert('Files ready for processing!');
+      alert("Files ready for processing!");
     }
   };
   const handleUploadClick = (type: FileType): void => {
-    if (type === 'video') {
+    if (type === "video") {
       videoInputRef.current?.click();
     } else {
       subtitleInputRef.current?.click();
@@ -101,7 +147,9 @@ export default function Home() {
                 QuickScribe
               </h1>
             </div>
-            <p className="text-slate-600 text-lg font-medium">Transform your videos with seamless subtitle integration</p>
+            <p className="text-slate-600 text-lg font-medium">
+              Transform your videos with seamless subtitle integration
+            </p>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full mx-auto mt-4"></div>
           </div>
         </div>
@@ -118,24 +166,28 @@ export default function Home() {
                   <Video className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-800">Video File</h2>
-                  <p className="text-sm text-slate-500">Upload your video content</p>
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    Video File
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Upload your video content
+                  </p>
                 </div>
               </div>
-              
+
               <div
                 className={`group relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer ${
                   dragActive.video
-                    ? 'border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 scale-[1.02] shadow-lg'
+                    ? "border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 scale-[1.02] shadow-lg"
                     : videoFile
-                    ? 'border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-md'
-                    : 'border-slate-300 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-indigo-50/50 hover:shadow-md'
+                    ? "border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-md"
+                    : "border-slate-300 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-indigo-50/50 hover:shadow-md"
                 }`}
-                onDragEnter={(e) => handleDrag(e, 'video')}
-                onDragLeave={(e) => handleDrag(e, 'video')}
-                onDragOver={(e) => handleDrag(e, 'video')}
-                onDrop={(e) => handleDrop(e, 'video')}
-                onClick={() => handleUploadClick('video')}
+                onDragEnter={(e) => handleDrag(e, "video")}
+                onDragLeave={(e) => handleDrag(e, "video")}
+                onDragOver={(e) => handleDrag(e, "video")}
+                onDrop={(e) => handleDrop(e, "video")}
+                onClick={() => handleUploadClick("video")}
               >
                 <input
                   ref={videoInputRef}
@@ -143,11 +195,11 @@ export default function Home() {
                   accept="video/*"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const file = e.target.files?.[0];
-                    if (file) handleFileSelection(file, 'video');
+                    if (file) handleFileSelection(file, "video");
                   }}
                   className="hidden"
                 />
-                
+
                 {videoFile ? (
                   <div className="space-y-4">
                     <div className="relative">
@@ -159,13 +211,17 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="font-semibold text-slate-800 truncate max-w-xs mx-auto">{videoFile.name}</p>
-                      <p className="text-sm text-slate-500 font-medium">{formatFileSize(videoFile.size)}</p>
+                      <p className="font-semibold text-slate-800 truncate max-w-xs mx-auto">
+                        {videoFile.name}
+                      </p>
+                      <p className="text-sm text-slate-500 font-medium">
+                        {formatFileSize(videoFile.size)}
+                      </p>
                     </div>
                     <button
                       onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                         e.preventDefault();
-                        removeFile('video');
+                        removeFile("video");
                       }}
                       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all duration-200"
                     >
@@ -182,8 +238,12 @@ export default function Home() {
                       <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-slate-700 font-medium">Drop your video file here, or click to browse</p>
-                      <p className="text-sm text-slate-400">Supports MP4, MOV, AVI, and more formats</p>
+                      <p className="text-slate-700 font-medium">
+                        Drop your video file here, or click to browse
+                      </p>
+                      <p className="text-sm text-slate-400">
+                        Supports MP4, MOV, AVI, and more formats
+                      </p>
                     </div>
                   </div>
                 )}
@@ -197,24 +257,28 @@ export default function Home() {
                   <FileText className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-800">Subtitle File</h2>
-                  <p className="text-sm text-slate-500">Upload your subtitle content</p>
+                  <h2 className="text-xl font-semibold text-slate-800">
+                    Subtitle File
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Upload your subtitle content
+                  </p>
                 </div>
               </div>
-              
+
               <div
                 className={`group relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer ${
                   dragActive.subtitle
-                    ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-purple-50 scale-[1.02] shadow-lg'
+                    ? "border-indigo-400 bg-gradient-to-br from-indigo-50 to-purple-50 scale-[1.02] shadow-lg"
                     : subtitleFile
-                    ? 'border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-md'
-                    : 'border-slate-300 hover:border-indigo-300 hover:bg-gradient-to-br hover:from-indigo-50/50 hover:to-purple-50/50 hover:shadow-md'
+                    ? "border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-md"
+                    : "border-slate-300 hover:border-indigo-300 hover:bg-gradient-to-br hover:from-indigo-50/50 hover:to-purple-50/50 hover:shadow-md"
                 }`}
-                onDragEnter={(e) => handleDrag(e, 'subtitle')}
-                onDragLeave={(e) => handleDrag(e, 'subtitle')}
-                onDragOver={(e) => handleDrag(e, 'subtitle')}
-                onDrop={(e) => handleDrop(e, 'subtitle')}
-                onClick={() => handleUploadClick('subtitle')}
+                onDragEnter={(e) => handleDrag(e, "subtitle")}
+                onDragLeave={(e) => handleDrag(e, "subtitle")}
+                onDragOver={(e) => handleDrag(e, "subtitle")}
+                onDrop={(e) => handleDrop(e, "subtitle")}
+                onClick={() => handleUploadClick("subtitle")}
               >
                 <input
                   ref={subtitleInputRef}
@@ -222,11 +286,11 @@ export default function Home() {
                   accept=".srt,.txt"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const file = e.target.files?.[0];
-                    if (file) handleFileSelection(file, 'subtitle');
+                    if (file) handleFileSelection(file, "subtitle");
                   }}
                   className="hidden"
                 />
-                
+
                 {subtitleFile ? (
                   <div className="space-y-4">
                     <div className="relative">
@@ -238,13 +302,17 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <p className="font-semibold text-slate-800 truncate max-w-xs mx-auto">{subtitleFile.name}</p>
-                      <p className="text-sm text-slate-500 font-medium">{formatFileSize(subtitleFile.size)}</p>
+                      <p className="font-semibold text-slate-800 truncate max-w-xs mx-auto">
+                        {subtitleFile.name}
+                      </p>
+                      <p className="text-sm text-slate-500 font-medium">
+                        {formatFileSize(subtitleFile.size)}
+                      </p>
                     </div>
                     <button
                       onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                         e.preventDefault();
-                        removeFile('subtitle');
+                        removeFile("subtitle");
                       }}
                       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all duration-200"
                     >
@@ -261,12 +329,58 @@ export default function Home() {
                       <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-slate-700 font-medium">Drop your subtitle file here, or click to browse</p>
-                      <p className="text-sm text-slate-400">Supports SRT and TXT file formats</p>
+                      <p className="text-slate-700 font-medium">
+                        Drop your subtitle file here, or click to browse
+                      </p>
+                      <p className="text-sm text-slate-400">
+                        Supports SRT and TXT file formats
+                      </p>
                     </div>
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-8 mb-10">
+            <div>
+              <Label>
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-xl flex items-center justify-center">
+                  <LucideLanguages className="w-5 h-5 text-indigo-600" />
+                </div>
+                Select Language
+              </Label>
+              <Select>
+                <SelectTrigger className="w-full !h-12">
+                  <SelectValue placeholder="Select language..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {languages.map((lang) => (
+                    <SelectItem key={lang} value={lang}>
+                      {lang}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-xl flex items-center justify-center">
+                  <Drama className="w-5 h-5 text-indigo-600" />
+                </div>
+                Select Style
+              </Label>
+              <Select>
+                <SelectTrigger className="w-full !h-12">
+                  <SelectValue placeholder="Theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -277,20 +391,26 @@ export default function Home() {
               disabled={!videoFile || !subtitleFile}
               className={`group relative px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ${
                 videoFile && subtitleFile
-                  ? 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600'
-                  : 'bg-gradient-to-r from-slate-200 to-slate-300 text-slate-400 cursor-not-allowed'
+                  ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600"
+                  : "bg-gradient-to-r from-slate-200 to-slate-300 text-slate-400 cursor-not-allowed"
               }`}
             >
               <span className="relative z-10 flex items-center gap-3">
                 <Sparkles className="w-5 h-5" />
                 Process Files
-                <div className={`w-2 h-2 rounded-full ${videoFile && subtitleFile ? 'bg-white animate-pulse' : 'bg-slate-400'}`}></div>
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    videoFile && subtitleFile
+                      ? "bg-white animate-pulse"
+                      : "bg-slate-400"
+                  }`}
+                ></div>
               </span>
               {videoFile && subtitleFile && (
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               )}
             </button>
-            
+
             {(!videoFile || !subtitleFile) && (
               <div className="flex items-center justify-center gap-2 text-slate-400">
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
@@ -306,7 +426,10 @@ export default function Home() {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-slate-400 text-sm">
-            Powered by <span className="font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">QuickScribe</span>
+            Powered by{" "}
+            <span className="font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
+              QuickScribe
+            </span>
           </p>
         </div>
       </div>
