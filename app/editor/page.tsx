@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Edit3, Save, Plus, X, Sparkles, ArrowLeft } from 'lucide-react';
-
+import { useRouter } from "next/navigation";
 interface SubtitleEntry {
   id: number;
   startTime: number;
@@ -17,6 +17,8 @@ interface Speaker {
 }
 
 const VideoSubtitleEditor: React.FC = () => {
+  const router = useRouter();
+
   // Video state
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -153,8 +155,9 @@ const VideoSubtitleEditor: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors duration-200">
+              <button className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors duration-200" onClick={() => {router.back() }}>
                 <ArrowLeft className="w-5 h-5 text-slate-600" />
+                
               </button>
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center">

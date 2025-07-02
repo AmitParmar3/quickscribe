@@ -534,8 +534,7 @@ export default function Home() {
       </div>
 
       {/* Overlay for Move to Editor button */}
-      { (
-  <>
+      {!isProcessing && progress === 100 && (
     
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px]">
         <div className="bg-white/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center">
@@ -549,7 +548,6 @@ export default function Home() {
           </button>
         </div>
       </div>
-  </>
 )}
       
     </div>
