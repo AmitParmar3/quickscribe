@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 interface DragActiveState {
   video: boolean;
@@ -84,6 +85,7 @@ export default function Home() {
     style: "",
   },
 });
+  const router = useRouter();
 
   const handleDrag = (
     e: React.DragEvent<HTMLDivElement>,
@@ -126,7 +128,7 @@ export default function Home() {
   
 
   const removeFile = (type: FileType): void => {
-    if (type === "video") {
+    if (type === "video") { 
       setValue("video", null);
       if (videoInputRef.current) videoInputRef.current.value = "";
     } else {
@@ -146,6 +148,7 @@ export default function Home() {
     console.log("Form Data:", data);
     console.log("Video File:", data.video);
     console.log("Subtitle File:", data.subtitle);
+    router.push("/editor");
     // Continue processing
   };
   const handleUploadClick = (type: FileType): void => {
@@ -517,11 +520,7 @@ export default function Home() {
           </div>
         )}
 
-        {!isProcessing && progress === 100 && (
-          <div className="flex items-center gap-2 text-green-600 text-sm pt-4">
-            <CheckCircle className="w-4 h-4" /> Translation complete!
-          </div>
-        )}
+       
 
         {/* Footer */}
         <div className="text-center mt-8">
@@ -533,6 +532,27 @@ export default function Home() {
           </p>
         </div>
       </div>
+
+      {/* Overlay for Move to Editor button */}
+      { (
+  <>
+    
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px]">
+        <div className="bg-white/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center">
+        <div className="flex items-center gap-2 text-green-600 text-md pt-4">
+        <CheckCircle className="w-8 h-8" /> Translation complete! </div> 
+          <button
+            className="group relative px-15 py-5 mt-4 rounded-2xl font-semibold text-lg transition-all duration-100 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600"
+            onClick={() => router.push('/editor')}
+          >
+            Move to Editor
+          </button>
+        </div>
+      </div>
+  </>
+)}
+      
     </div>
   );
 }
+
