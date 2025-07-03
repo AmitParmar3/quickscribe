@@ -1,6 +1,5 @@
-'use client';
-import Image from "next/image";
-import {Controller, SubmitHandler, useForm } from "react-hook-form";
+"use client";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import {
   Upload,
   Video,
@@ -8,7 +7,6 @@ import {
   X,
   Check,
   Sparkles,
-  Languages,
   LucideLanguages,
   Drama,
   Loader2,
@@ -22,8 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRef, useState } from "react";
-import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface DragActiveState {
   video: boolean;
@@ -37,7 +35,7 @@ type FormData = {
   subtitle: File | null;
   language: string;
   style: string;
-}
+};
 
 const styles = [
   "sad",
@@ -58,34 +56,26 @@ const languages = [
   "Korean",
 ];
 
-
 export default function Home() {
+  const router = useRouter();
+
   const [dragActive, setDragActive] = useState<DragActiveState>({
     video: false,
     subtitle: false,
   });
   const videoInputRef = useRef<HTMLInputElement>(null);
   const subtitleInputRef = useRef<HTMLInputElement>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-    const [selectedStyle, setSelectedStyle] = useState("");
-    const [customPrompt, setCustomPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const {
-  control,
-  handleSubmit: formSubmit,
-  watch,
-  setValue,
-  register,
-} = useForm<FormData>({
-  defaultValues: {
-    video: null,
-    subtitle: null,
-    language: "",
-    style: "",
-  },
-});
-  const router = useRouter();
+
+  const { control, handleSubmit, watch, setValue } = useForm<FormData>({
+    defaultValues: {
+      video: null,
+      subtitle: null,
+      language: "",
+      style: "",
+    },
+  });
 
   const handleDrag = (
     e: React.DragEvent<HTMLDivElement>,
@@ -125,10 +115,9 @@ export default function Home() {
       }
     }
   };
-  
 
   const removeFile = (type: FileType): void => {
-    if (type === "video") { 
+    if (type === "video") {
       setValue("video", null);
       if (videoInputRef.current) videoInputRef.current.value = "";
     } else {
@@ -136,6 +125,7 @@ export default function Home() {
       if (subtitleInputRef.current) subtitleInputRef.current.value = "";
     }
   };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -145,12 +135,11 @@ export default function Home() {
   };
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
-    console.log("Form Data:", data);
-    console.log("Video File:", data.video);
-    console.log("Subtitle File:", data.subtitle);
-    router.push("/editor");
+    console.log(data, "FORMDATA");
+
     // Continue processing
   };
+
   const handleUploadClick = (type: FileType): void => {
     if (type === "video") {
       videoInputRef.current?.click();
@@ -158,7 +147,7 @@ export default function Home() {
       subtitleInputRef.current?.click();
     }
   };
-   const handleProcess = () => {
+  const handleProcess = () => {
     setIsProcessing(true);
     setProgress(0);
 
@@ -201,7 +190,10 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-6 pb-12">
-        <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-8"
+        >
           <div className="grid lg:grid-cols-2 gap-8 mb-10">
             {/* Video Upload */}
             <div className="space-y-6">
@@ -244,7 +236,7 @@ export default function Home() {
                   className="hidden"
                 />
 
-             {watch("video") ? (
+                {watch("video") ? (
                   <div className="space-y-4">
                     <div className="relative">
                       <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl mx-auto shadow-lg">
@@ -405,23 +397,23 @@ export default function Home() {
                 control={control}
                 name="language"
                 render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger id="language" className="w-full !h-12 mt-4">
-                  <SelectValue placeholder="Select Language" />
-                </SelectTrigger>
-                <SelectContent>
-                  {languages.map((lang) => (
-                    <SelectItem key={lang} value={lang}>
-                      {lang}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="language" className={cn("w-full !h-12 mt-4")}>
+                      <SelectValue placeholder="Select Language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languages.map((lang) => (
+                        <SelectItem key={lang} value={lang}>
+                          {lang}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
               />
             </div>
 
-           <div>
+            <div>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
                   <Drama className="w-5 h-5 text-blue-600" />
@@ -435,15 +427,18 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-             
-               <div className="space-y-2">
+
+              <div className="space-y-2">
                 <Controller
                   control={control}
                   name="style"
                   render={({ field }) => (
                     <>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger  className="w-full !h-12 mt-4">
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full !h-12 mt-4">
                           <SelectValue placeholder="Choose a style" />
                         </SelectTrigger>
                         <SelectContent>
@@ -458,9 +453,6 @@ export default function Home() {
                   )}
                 />
               </div>
-
-              
-
             </div>
           </div>
 
@@ -469,11 +461,12 @@ export default function Home() {
             <button
               onClick={handleProcess}
               disabled={!watch("video") || !watch("subtitle")}
-              className={`group relative px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ${
+              className={cn(
+                "group relative cursor-pointer px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300",
                 watch("video") && watch("subtitle")
                   ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600"
                   : "bg-gradient-to-r from-slate-200 to-slate-300 text-slate-400 cursor-not-allowed"
-              }`}
+              )}
             >
               <span className="relative z-10 flex items-center gap-3">
                 <Sparkles className="w-5 h-5" />
@@ -501,14 +494,13 @@ export default function Home() {
               </div>
             )}
           </div>
-        </div>
-
-
+        </form>
 
         {isProcessing && (
           <div className="pt-4 space-y-2">
             <div className="flex items-center gap-2 text-sm">
-              <Loader2 className="animate-spin w-4 h-4" /> Processing Translation...
+              <Loader2 className="animate-spin w-4 h-4" /> Processing
+              Translation...
             </div>
             <div className="w-full h-2 bg-gray-200 rounded">
               <div
@@ -519,8 +511,6 @@ export default function Home() {
             <div className="text-xs text-gray-500">{progress}% complete</div>
           </div>
         )}
-
-       
 
         {/* Footer */}
         <div className="text-center mt-8">
@@ -535,22 +525,20 @@ export default function Home() {
 
       {/* Overlay for Move to Editor button */}
       {!isProcessing && progress === 100 && (
-    
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px]">
-        <div className="bg-white/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center">
-        <div className="flex items-center gap-2 text-green-600 text-md pt-4">
-        <CheckCircle className="w-8 h-8" /> Translation complete! </div> 
-          <button
-            className="group relative px-15 py-5 mt-4 rounded-2xl font-semibold text-lg transition-all duration-100 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600"
-            onClick={() => router.push('/editor')}
-          >
-            Move to Editor
-          </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px]">
+          <div className="bg-white/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center">
+            <div className="flex items-center gap-2 text-green-600 text-md pt-4">
+              <CheckCircle className="w-8 h-8" /> Translation complete!{" "}
+            </div>
+            <button
+              className="group relative px-15 py-5 mt-4 rounded-2xl font-semibold text-lg transition-all duration-100 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600"
+              onClick={() => router.push("/editor")}
+            >
+              Move to Editor
+            </button>
+          </div>
         </div>
-      </div>
-)}
-      
+      )}
     </div>
   );
 }
-
