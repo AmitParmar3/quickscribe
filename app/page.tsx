@@ -38,13 +38,13 @@ type FormData = {
 };
 
 const styles = [
-  "sad",
-  "royal",
-  "genZ comedy",
-  "comedic",
-  "funny",
-  "millennial",
-  "custom",
+  "Sad",
+  "Royal",
+  "GenZ comedy",
+  "Comedic",
+  "Funny",
+  "Millennial",
+  "Custom",
 ];
 
 const languages = [
@@ -398,7 +398,7 @@ export default function Home() {
                 name="language"
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger id="language" className={cn("w-full !h-12 mt-4")}>
+                    <SelectTrigger id="language" className={cn("w-full !h-12 mt-4", !field.value ? " ":"border-8, bg-gradient-to-r from-blue-100 to-blue-50 to-blue-0 text-blue-800/85 font-semibold")} >
                       <SelectValue placeholder="Select Language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -438,8 +438,8 @@ export default function Home() {
                         onValueChange={field.onChange}
                         value={field.value}
                       >
-                        <SelectTrigger className="w-full !h-12 mt-4">
-                          <SelectValue placeholder="Choose a style" />
+                        <SelectTrigger id = "styles" className={cn("w-full !h-12 mt-4", !field.value ? " ":"border-8, bg-gradient-to-r from-blue-100 to-blue-50  text-blue-800/85 font-semibold")}>
+                          <SelectValue placeholder="Choose a style"/>
                         </SelectTrigger>
                         <SelectContent>
                           {styles.map((style) => (
@@ -512,16 +512,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-slate-400 text-sm">
-            Powered by{" "}
-            <span className="font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
-              QuickScribe
-            </span>
-          </p>
-        </div>
-      </div>
+        
 
       {/* Overlay for Move to Editor button */}
       {!isProcessing && progress === 100 && (
@@ -540,5 +531,15 @@ export default function Home() {
         </div>
       )}
     </div>
+    {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-slate-400 text-sm">
+            Powered by{" "}
+            <span className="font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
+              QuickScribe
+            </span>
+          </p>
+        </div>
+      </div>
   );
 }
