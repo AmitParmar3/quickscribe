@@ -67,7 +67,13 @@ const languages = [
 
 export default function Home() {
   const router = useRouter();
-  const { theme } = useTheme();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering theme-dependent content after mount
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [dragActive, setDragActive] = useState<DragActiveState>({
     video: false,
@@ -181,7 +187,7 @@ export default function Home() {
       </div>
       
             {/* Aurora as background at the very top - Only in dark mode */}
-      {theme === "dark" && (
+      {mounted && resolvedTheme === "dark" && (
         <div className="absolute top-0 left-0 w-full pointer-events-none">
           <Aurora
             colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
@@ -193,7 +199,7 @@ export default function Home() {
       )}
       
       {/* Particles background - Only in light mode */}
-      {theme === "light" && (
+      {mounted && resolvedTheme === "light" && (
         <div className="absolute top-0 left-0 w-full h-screen pointer-events-none z-0">
           
         </div>
