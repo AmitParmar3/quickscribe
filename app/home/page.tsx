@@ -29,6 +29,8 @@ import {
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "next-themes";
 
 interface DragActiveState {
   video: boolean;
@@ -65,6 +67,7 @@ const languages = [
 
 export default function Home() {
   const router = useRouter();
+  const { theme } = useTheme();
 
   const [dragActive, setDragActive] = useState<DragActiveState>({
     video: false,
@@ -172,15 +175,30 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground">
-      {/* Aurora as background at the very top */}
-      <div className="absolute top-0 left-0 w-full pointer-events-none">
-        <Aurora
-          colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-          blend={2}
-          amplitude={1}
-          speed={1.5}
-        />
+      {/* Theme Toggle - Top Right */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
       </div>
+      
+            {/* Aurora as background at the very top - Only in dark mode */}
+      {theme === "dark" && (
+        <div className="absolute top-0 left-0 w-full pointer-events-none">
+          <Aurora
+            colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
+            blend={2}
+            amplitude={1}
+            speed={1.5}
+          />
+        </div>
+      )}
+      
+      {/* Particles background - Only in light mode */}
+      {theme === "light" && (
+        <div className="absolute top-0 left-0 w-full h-screen pointer-events-none z-0">
+          
+        </div>
+      )}
+      
       <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden w-full">
         <div className="relative z-10 flex flex-col items-center justify-center h-full w-full">
           <SplitText
@@ -197,13 +215,13 @@ export default function Home() {
             textAlign="center"
           />
           <GradientText
-  colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
-  animationSpeed={3}
-  showBorder={false}
-  className="text-xl opacity-80 mb-12"
->
-  Your fastest way to transcribe and summarize files
-</GradientText>
+            colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
+            animationSpeed={3}
+            showBorder={false}
+            className="text-xl opacity-80 mb-12"
+          >
+            Your fastest way to transcribe and summarize files
+          </GradientText>
          
           <div className="absolute bottom-10 animate-bounce">
             <span className="text-3xl">↓</span>
@@ -275,7 +293,7 @@ export default function Home() {
       >
         <motion.form
           onSubmit={handleSubmit(onSubmit)}
-          className="bg-card/50 backdrop-blur-sm rounded-3xl shadow-xl border border-border/50 p-8"
+          className="bg-card/50 backdrop-blur-sm rounded-3xl shadow-xl border border-border/50 p-8 dark:bg-card/30 dark:border-border/30"
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}  
           viewport={{ once: true, margin: "-100px" }}
@@ -302,10 +320,10 @@ export default function Home() {
               <div
                 className={`group relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer ${
                   dragActive.video
-                    ? "border-blue-400 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 scale-[1.02] shadow-lg"
+                    ? "border-blue-400 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 scale-[1.02] shadow-lg dark:from-blue-500/20 dark:to-indigo-500/20"
                     : watch("video")
-                    ? "border-emerald-400 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 shadow-md"
-                    : "border-border hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-500/5 hover:to-indigo-500/5 hover:shadow-md"
+                    ? "border-emerald-400 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 shadow-md dark:from-emerald-500/20 dark:to-teal-500/20"
+                    : "border-border hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-500/5 hover:to-indigo-500/5 hover:shadow-md dark:hover:from-blue-500/15 dark:hover:to-indigo-500/15"
                 }`}
                 onDragEnter={(e) => handleDrag(e, "video")}
                 onDragLeave={(e) => handleDrag(e, "video")}
@@ -393,10 +411,10 @@ export default function Home() {
               <div
                 className={`group relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 cursor-pointer ${
                   dragActive.subtitle
-                    ? "border-indigo-400 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 scale-[1.02] shadow-lg"
+                    ? "border-indigo-400 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 scale-[1.02] shadow-lg dark:from-indigo-500/20 dark:to-purple-500/20"
                     : watch("subtitle")
-                    ? "border-emerald-400 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 shadow-md"
-                    : "border-border hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-500/5 hover:to-purple-500/5 hover:shadow-md"
+                    ? "border-emerald-400 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 shadow-md dark:from-emerald-500/20 dark:to-teal-500/20"
+                    : "border-border hover:border-indigo-400 hover:bg-gradient-to-br hover:from-indigo-500/5 hover:to-purple-500/5 hover:shadow-md dark:hover:from-indigo-500/15 dark:hover:to-purple-500/15"
                 }`}
                 onDragEnter={(e) => handleDrag(e, "subtitle")}
                 onDragLeave={(e) => handleDrag(e, "subtitle")}
@@ -551,8 +569,8 @@ export default function Home() {
               className={cn(
                 "group relative cursor-pointer px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300",
                 watch("video") && watch("subtitle")
-                  ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600"
-                  : "bg-gradient-to-r from-muted to-muted/50 text-muted-foreground cursor-not-allowed"
+                  ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 dark:shadow-blue-500/25 dark:hover:shadow-blue-500/40"
+                  : "bg-gradient-to-r from-muted to-muted/50 text-muted-foreground cursor-not-allowed dark:from-muted/30 dark:to-muted/20"
               )}
             >
               <span className="relative z-10 flex items-center gap-3">
@@ -603,8 +621,8 @@ export default function Home() {
 
       {/* Overlay for Move to Editor button */}
       {!isProcessing && progress === 100 && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px]">
-          <div className="bg-card/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] dark:bg-black/80">
+          <div className="bg-card/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center dark:bg-card/90 dark:border dark:border-border/50">
             <div className="flex items-center gap-2 text-green-400 text-md pt-4">
               <CheckCircle className="w-8 h-8" /> Translation complete!{" "}
             </div>
