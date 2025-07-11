@@ -31,6 +31,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTheme } from "next-themes";
+import SubtitleOnlyForm from "../subonly/page";
 
 interface DragActiveState {
   video: boolean;
@@ -229,8 +230,18 @@ export default function Home() {
             Your fastest way to transcribe and summarize files
           </GradientText>
          
-          <div className="absolute bottom-10 animate-bounce">
-            <span className="text-3xl">↓</span>
+          <div className="absolute bottom-24 animate-bounce">
+            <button
+              type="button"
+              aria-label="Scroll to upload section"
+              className="focus:outline-none group"
+              onClick={() => {
+                const el = document.getElementById('upload-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <span className="text-3xl group-hover:text-blue-500 transition-colors">↓</span>
+            </button>
           </div>
         </div>
       </section>
@@ -245,6 +256,7 @@ export default function Home() {
       {/* uploading files */}
       <motion.div 
         className="pt-12 pb-8"
+        id="upload-section"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -641,6 +653,10 @@ export default function Home() {
           </div>
         </div>
       )}
+      {/* Subtitle Only Form Below */}
+      <div className="mt-16">
+        <SubtitleOnlyForm />
+      </div>
       </motion.div>
       {/* Footer */}
         <motion.div 
