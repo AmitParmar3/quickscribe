@@ -188,57 +188,46 @@ export default function Home() {
         <ThemeToggle />
       </div>
       {/* Backgrounds */}
-      {mounted && resolvedTheme === "dark" && (
-        <div className="absolute top-0 left-0 w-full pointer-events-none">
-          <Aurora
-            colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-            blend={2}
-            amplitude={1}
-            speed={1.5}
-          />
-        </div>
-      )}
       {mounted && resolvedTheme === "light" && (
         <div className="absolute top-0 left-0 w-full h-screen pointer-events-none z-0"></div>
       )}
       {/* Two-column layout */}
-      <div className="relative z-10 flex flex-row items-center justify-center w-full h-screen">
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-center w-full h-screen gap-0">
         {/* Left: QuickScribe branding */}
-        {/* Branding: QuickScribe text and tagline */}
-        <div className="flex-[2] flex flex-col justify-center items-center w-full min-w-[320px] sm:min-w-[400px] h-full overflow-x-auto">
-          <div className="flex flex-col">
-            {/* QuickScribe animated text */}
-            {useMemo(() => (
-              <SplitText
-                text="QuickScribe"
-                className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-left leading-tight whitespace-nowrap"
-                delay={20}
-                duration={1.5}
-                ease="power3.out"
-                splitType="chars"
-                from={{ opacity: 0, y: 400 }}
-                to={{ opacity: 1, y: 0 }}
-                threshold={0.1}
-                rootMargin="-100px"
-                textAlign="left"
-              />
-            ), [])}
-            {/* Tagline below QuickScribe */}
-            <GradientText
-              colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
-              animationSpeed={3}
-              showBorder={false}
-              className="text-xl opacity-80 mt-0 text-center self-center ml-10 sm:ml-30 whitespace-nowrap"
-            >
-              Your fastest way to transcribe and summarize files
-            </GradientText>
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-8 gap-8">
+          {/* Branding */}
+          {/* Translate Section */}
+          <div className="w-full flex flex-col items-center mb-6 ">
+            <div className="text-5xl font-extrabold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent tracking-wider mb-2">TRANSLATE</div>
+            <div className="text-lg max-w-xl mx-auto text-muted-foreground text-center mb-3">
+              This tool helps you translate subtitles into your language of choice, while making sure the tone and style of the subtitles are preserved.
+            </div>
+            <button className="w-32 h-10 shadow-md shadow-black/40 bg-blue-500/90 hover:bg-blue-600 text-white font-semibold text-base rounded-full shadow transition-all duration-200">Go</button>
+          </div>
+          {/* Speaker Section */}
+          <div className="w-full flex flex-col items-center mb-6 ">
+            <div className="text-5xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent tracking-wider mb-2">SPEAKER</div>
+            <div className="text-lg max-w-xl mx-auto text-muted-foreground text-center mb-3">
+              This tool helps you assign speakers to your subtitle file, and export it in multiple formats.
+            </div>
+            <button className="w-32 h-10 shadow-md shadow-black/40 bg-purple-500/90 hover:bg-purple-600 text-white rounded-full shadow transition-all duration-200">Go</button>
+          </div>
+          {/* Editor Section */}
+          <div className="w-full flex flex-col items-center ">
+            <div className="text-5xl font-extrabold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent tracking-wider mb-2">EDITOR</div>
+            <div className="text-lg max-w-xl mx-auto text-muted-foreground text-center mb-3">
+              This is a full fledged editor, where you can transcribe your subtitles live, add speakers, while making sure the lipsync is preserved.
+            </div>
+            <button className="w-32 h-10 shadow-md shadow-black/40 bg-green-500/90 hover:bg-green-600 text-white rounded-full shadow transition-all duration-200">Go</button>
           </div>
         </div>
+        {/* Vertical Divider */}
+        <div className="hidden md:block h-[80vh] w-px bg-border"></div>
         {/* Right: Upload section with toggle */}
         {/* Upload Card Section: Toggle buttons and upload UI */}
-        <div className="flex-[1] flex flex-col items-end justify-center pr-8 w-full">
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl">
-            <div className="bg-card/50 backdrop-blur-sm rounded-3xl shadow-xl border border-border/50 p-0 dark:bg-card/30 dark:border-border/30 w-full flex flex-col overflow-y-auto">
+            <div className="bg-card/50 backdrop-blur-sm border-10 rounded-3xl shadow-xl border border-border/50 p-0 dark:bg-card/30 dark:border-border/30 w-[90vw] max-w-xl h-[80vh] flex flex-col overflow-y-auto">
               {/* Toggle buttons inside the card */}
               <div className="flex gap-4 p-8 pb-0 border-b border-border/30">
                 <button
