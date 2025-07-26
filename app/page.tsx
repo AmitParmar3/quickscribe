@@ -117,12 +117,12 @@ export default function Home() {
         
         {/* Tagline below QuickScribe */}
         <GradientText
-          colors={["#40ffaa", "#4079ff", "#40ffaa", "#4079ff", "#40ffaa"]}
+          colors={["#4079ff", "oklch(70.4% 0.14 182.503)",  "#4079ff", "#40ffaa"]}
           animationSpeed={3}
           showBorder={false}
-          className="text-xl opacity-80 mt-0 text-center self-center whitespace-nowrap"
+          className="text-xl opacity-80 -mt-0 text-center self-center whitespace-nowrap"
         >
-          Your fastest way to transcribe and summarize files
+          Elevating Your Subtitles Through Intelligent Automation.
         </GradientText>
       </div>
     </div>
