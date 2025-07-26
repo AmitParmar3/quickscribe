@@ -18,6 +18,7 @@ import {
   Drama,
   Loader2,
   CheckCircle,
+  Languages,
 } from "lucide-react";
 import {
   Select,
@@ -70,7 +71,7 @@ export default function Home() {
   const router = useRouter();
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [mode, setMode] = useState<'translate' | 'editor'>('translate');
+  const [mode, setMode] = useState<'translate' | 'assign' | 'workstation'>('translate');
 
   // Prevent hydration mismatch by only rendering theme-dependent content after mount
   React.useEffect(() => {
@@ -198,27 +199,26 @@ export default function Home() {
           {/* Branding */}
           {/* Translate Section */}
           <div className="w-full flex flex-col items-center mb-6 ">
+          
             <div className="text-5xl font-extrabold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent tracking-wider mb-2">TRANSLATE</div>
-            <div className="text-lg max-w-xl mx-auto text-muted-foreground text-center mb-3">
-              This tool helps you translate subtitles into your language of choice, while making sure the tone and style of the subtitles are preserved.
-            </div>
-            <button className="w-32 h-10 shadow-md shadow-black/40 bg-blue-500/90 hover:bg-blue-600 text-white font-semibold text-base rounded-full shadow transition-all duration-200">Go</button>
+            <div className="text-lg max-w-2xl mx-auto text-muted-foreground text-center mb-3">
+            TRANSLATE localizes your SRTs to any language, perfectly preserving the original tone and context. Deliver precise, nuanced translations every time.</div>
+            <button className="w-32 h-10 shadow-md shadow-black/40 bg-blue-500/90 hover:bg-blue-600 text-white font-semibold text-base rounded-full shadow transition-all duration-200" onClick={() => setMode('translate')}>Go</button>
           </div>
           {/* Speaker Section */}
           <div className="w-full flex flex-col items-center mb-6 ">
-            <div className="text-5xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent tracking-wider mb-2">SPEAKER</div>
-            <div className="text-lg max-w-xl mx-auto text-muted-foreground text-center mb-3">
-              This tool helps you assign speakers to your subtitle file, and export it in multiple formats.
-            </div>
-            <button className="w-32 h-10 shadow-md shadow-black/40 bg-purple-500/90 hover:bg-purple-600 text-white rounded-full shadow transition-all duration-200">Go</button>
+            <div className="text-5xl font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent tracking-wider mb-2">ASSIGN</div>
+            <div className="text-lg max-w-2xl mx-auto text-muted-foreground text-center mb-3">
+            ASSIGN streamlines the process of accurately attributing speakers within your SRT files. Precisely label dialogue for clarity and professional presentation.            </div>
+            <button className="w-32 h-10 shadow-md shadow-black/40 bg-purple-500/90 hover:bg-purple-600 text-white rounded-full shadow transition-all duration-200" onClick={() => setMode('assign')}>Go</button>
           </div>
           {/* Editor Section */}
           <div className="w-full flex flex-col items-center ">
-            <div className="text-5xl font-extrabold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent tracking-wider mb-2">EDITOR</div>
-            <div className="text-lg max-w-xl mx-auto text-muted-foreground text-center mb-3">
-              This is a full fledged editor, where you can transcribe your subtitles live, add speakers, while making sure the lipsync is preserved.
+            <div className="text-5xl font-extrabold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent tracking-wider mb-2">WORKSTATION</div>
+            <div className="text-lg max-w-2xl mx-auto text-muted-foreground text-center mb-3">
+            WORKSTATION is your complete live subtitling editor. Transcribe, add speakers, and maintain perfect lip-sync, all in real-time.
             </div>
-            <button className="w-32 h-10 shadow-md shadow-black/40 bg-green-500/90 hover:bg-green-600 text-white rounded-full shadow transition-all duration-200">Go</button>
+            <button className="w-32 h-10 shadow-md shadow-black/40 bg-green-500/90 hover:bg-green-600 text-white rounded-full shadow transition-all duration-200" onClick={() => setMode('workstation')}>Go</button>
           </div>
         </div>
         {/* Vertical Divider */}
@@ -227,20 +227,28 @@ export default function Home() {
         {/* Upload Card Section: Toggle buttons and upload UI */}
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center">
           <div className="w-full max-w-xl">
-            <div className="bg-card/50 backdrop-blur-sm border-10 rounded-3xl shadow-xl border border-border/50 p-0 dark:bg-card/30 dark:border-border/30 w-[90vw] max-w-xl h-[80vh] flex flex-col overflow-y-auto">
+            <div className="bg-card/50 backdrop-blur-sm rounded-3xl shadow-xl border border-border/50 p-0 dark:bg-card/30 dark:border-border/30 w-[90vw] max-w-xl h-[80vh] flex flex-col overflow-y-auto">
               {/* Toggle buttons inside the card */}
-              <div className="flex gap-4 p-8 pb-0 border-b border-border/30">
+              <div className="flex w-full p-0 m-0 border-b border-border/30">
                 <button
-                  className={`px-6 py-2 rounded-full font-semibold text-lg transition-all duration-200 border-2 ${mode === 'translate' ? 'bg-blue-500 text-white border-blue-500' : 'bg-transparent text-blue-500 border-blue-500 hover:bg-blue-50'}`}
+                  className={`flex-1 rounded-none border-0 py-4 text-xl font-semibold transition-all duration-200 ${mode === 'translate' ? 'bg-blue-500 text-white' : 'bg-card/50 text-blue-500 hover:bg-blue-50'} ${mode === 'translate' ? '' : 'hover:text-blue-600'}`}
+                  style={{borderRight: '1px solid var(--border)'}}
                   onClick={() => setMode('translate')}
                 >
-                  Translate Subtitles Only
+                  Translate
                 </button>
                 <button
-                  className={`px-6 py-2 rounded-full font-semibold text-lg transition-all duration-200 border-2 ${mode === 'editor' ? 'bg-purple-500 text-white border-purple-500' : 'bg-transparent text-purple-500 border-purple-500 hover:bg-purple-50'}`}
-                  onClick={() => setMode('editor')}
+                  className={`flex-1 rounded-none border-0 py-4 text-xl font-semibold transition-all duration-200 ${mode === 'assign' ? 'bg-purple-500 text-white' : 'bg-card/50 text-purple-500 hover:bg-purple-50'} ${mode === 'assign' ? '' : 'hover:text-purple-600'}`}
+                  style={{borderRight: '1px solid var(--border)'}}
+                  onClick={() => setMode('assign')}
                 >
-                  Editor (Subtitles + Video)
+                  Assign
+                </button>
+                <button
+                  className={`flex-1 rounded-none border-0 py-4 text-xl font-semibold transition-all duration-200 ${mode === 'workstation' ? 'bg-green-500 text-white' : 'bg-card/50 text-green-500 hover:bg-green-50'} ${mode === 'workstation' ? '' : 'hover:text-green-600'}`}
+                  onClick={() => setMode('workstation')}
+                >
+                  Workstation
                 </button>
               </div>
               <div className="p-8">
