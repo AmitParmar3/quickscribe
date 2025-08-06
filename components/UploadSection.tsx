@@ -213,23 +213,25 @@ export default function UploadSection() {
       setError(null);
 
       try {
-        // Upload the subtitle file and create session
+        // Upload the subtitle file and create assignment session
         setProgress(25);
         
-        // For speaker assignment, we use translateFile to create a session
-        // (this will parse the subtitle and create the session in backend)
-        const response = await QuickScribeAPI.translateFile(subtitleFile, 'Hindi', 'Default');
+        // Use the new assignment API to create session and parse SRT
+        const response = await QuickScribeAPI.createAssignmentSession(subtitleFile, sessionId || undefined);
         
         setProgress(75);
         setSessionId(response.session_id);
         
-        // Store session_id in localStorage
+        // Store session_id and file_id in localStorage
         localStorage.setItem('session_id', response.session_id);
+        localStorage.setItem('file_id', response.file_id.toString());
         
         setProgress(100);
 
         setTimeout(() => {
           setIsProcessing(false);
+          // Redirect to assign page with session_id
+          router.push(`/assign?session_id=${response.session_id}`);
         }, 500);
 
       } catch (error) {
@@ -532,7 +534,11 @@ export default function UploadSection() {
                     {/* Action Section */}
                     <div className="text-center space-y-8">
                       <button
-                        onClick={handleProcess}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleProcess();
+                        }}
                         disabled={!watch('subtitle')}
                         className={cn(
                           "group relative cursor-pointer px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-500 transform",
@@ -590,7 +596,7 @@ export default function UploadSection() {
                             className="group relative px-15 py-5 mt-4 rounded-2xl font-semibold text-lg transition-all duration-100 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-purple-600 hover:via-pink-600 hover:to-purple-600"
                             onClick={() => {
                               if (sessionId) {
-                                router.push(`/speaker?session_id=${sessionId}`);
+                                router.push(`/assign?session_id=${sessionId}`);
                               } else {
                                 setError('Session ID not found. Please try again.');
                               }

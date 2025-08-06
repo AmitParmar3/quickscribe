@@ -53,22 +53,39 @@ export default function SpeakerPage() {
     setMounted(true);
   }, []);
 
+  // Load data from backend
+  const loadDataFromBackend = async (fileId: number) => {
+    try {
+      const data = await QuickScribeAPI.getFileData(fileId);
+      setSubtitles(data.subtitles);
+      
+      // If speakers are returned from backend, use them, otherwise use default speakers
+      if (data.speakers && data.speakers.length > 0) {
+        setSpeakers(data.speakers);
+      }
+    } catch (error) {
+      console.error('Failed to load data from backend:', error);
+      // Fallback to mock data if backend fails
+      loadMockData();
+    }
+  };
+
   // Get session ID and load data
   useEffect(() => {
     const urlSessionId = searchParams.get('session_id');
     const storedSessionId = localStorage.getItem('session_id');
+    const fileId = localStorage.getItem('file_id');
     
     const finalSessionId = urlSessionId || storedSessionId;
     
-    if (finalSessionId) {
+    if (finalSessionId && fileId) {
       setSessionId(finalSessionId);
       localStorage.setItem('session_id', finalSessionId); // Backup storage
       
-      // TODO: Load speakers and subtitles from backend using session_id
-      // For now, we'll still use mock data but with session awareness
-      loadMockData();
+      // Load speakers and subtitles from backend using file_id
+      loadDataFromBackend(parseInt(fileId));
     } else {
-      console.error('No session ID found');
+      console.error('No session ID or file ID found');
       // TODO: Redirect back to upload page or show error
     }
   }, [searchParams]);
@@ -213,9 +230,10 @@ export default function SpeakerPage() {
   // Export SRT function with backend integration
   const exportSRT = async () => {
     // Save assignments to backend first
-    if (sessionId) {
+    const fileId = localStorage.getItem('file_id');
+    if (fileId) {
       try {
-        await QuickScribeAPI.saveAssignments(sessionId, speakers, subtitles);
+        await QuickScribeAPI.saveFileAssignments(parseInt(fileId), speakers, subtitles);
         console.log('Assignments saved to backend successfully');
       } catch (error) {
         console.error('Failed to save assignments:', error);
@@ -323,7 +341,7 @@ export default function SpeakerPage() {
   return (
     <main className="relative h-screen w-full flex flex-col bg-background text-foreground overflow-hidden dark:bg-gray-950">
       {/* Session ID Check */}
-      {!sessionId && mounted && (
+      {(!sessionId || !localStorage.getItem('file_id')) && mounted && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-card rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
             <h2 className="text-xl font-bold mb-4 text-foreground">No Session Found</h2>
@@ -624,15 +642,24 @@ export default function SpeakerPage() {
                       <span className="font-medium whitespace-nowrap">{speaker.name}</span>
                     )}
                     {speakers.length > 1 && (
-                      <button
+                      <div
                         onClick={(e) => {
                           e.stopPropagation();
                           removeSpeaker(speaker.id);
                         }}
-                        className="p-1 text-muted-foreground hover:text-rose-600 transition-colors duration-200 rounded-md hover:bg-background/50 dark:hover:bg-gray-700 flex-shrink-0"
+                        className="p-1 text-muted-foreground hover:text-rose-600 transition-colors duration-200 rounded-md hover:bg-background/50 dark:hover:bg-gray-700 flex-shrink-0 cursor-pointer"
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            removeSpeaker(speaker.id);
+                          }
+                        }}
                       >
                         <X className="w-3 h-3" />
-                      </button>
+                      </div>
                     )}
                   </motion.button>
                 ))}

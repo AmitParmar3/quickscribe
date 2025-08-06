@@ -21,6 +21,69 @@ export class QuickScribeAPI {
     return response.json();
   }
 
+  // Create assignment session with SRT file
+  static async createAssignmentSession(file: File, sessionId?: string): Promise<{ session_id: string; file_id: number; message: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const headers: HeadersInit = {
+      'Accept': 'application/json',
+    };
+
+    // Add session_id as header if provided
+    if (sessionId) {
+      headers['session_id'] = sessionId;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/assign/create-session`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Assignment session creation failed');
+    }
+
+    return response.json();
+  }
+
+  // Get file data for assignment editor
+  static async getFileData(fileId: number): Promise<{ subtitles: SubtitleEntry[]; speakers: Speaker[] }> {
+    const response = await fetch(`${API_BASE_URL}/assign/file/${fileId}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch file data');
+    }
+
+    return response.json();
+  }
+
+  // Save assignment data
+  static async saveFileAssignments(fileId: number, speakers: Speaker[], subtitles: SubtitleEntry[]): Promise<{ success: boolean; message: string }> {
+    const response = await fetch(`${API_BASE_URL}/assign/save/${fileId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        speakers,
+        subtitles
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to save assignments');
+    }
+
+    return response.json();
+  }
+
   // Translate file and get session_id
   static async translateFile(file: File, language: string, style: string): Promise<{ response: string; session_id: string }> {
     const formData = new FormData();

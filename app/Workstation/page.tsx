@@ -2,27 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Edit3, Save, Plus, X, Sparkles, ArrowLeft } from 'lucide-react';
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { saveAs } from "file-saver";
-interface SubtitleEntry {
-  id: number;
-  startTime: number;
-  endTime: number;
-  text1: string; // First language
-  text2: string; // Second language
-  editing?: boolean;
-  speakerId?: number;
-}
-
-interface Speaker {
-  id: number;
-  name: string;
-  color: string;
-}
+import { QuickScribeAPI, SubtitleEntry, Speaker } from "@/lib/api";
 
 const VideoSubtitleEditor: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fileId = searchParams.get('file_id');
 
   // Video state
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -36,6 +24,40 @@ const VideoSubtitleEditor: React.FC = () => {
   const [subtitles, setSubtitles] = useState<SubtitleEntry[]>([]);
   const [activeSubtitleId, setActiveSubtitleId] = useState<number | null>(null);
   const subtitleContainerRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Speaker state
+  const [speakers, setSpeakers] = useState<Speaker[]>([]);
+  const [editingSpeaker, setEditingSpeaker] = useState<number | null>(null);
+  const [newSpeakerName, setNewSpeakerName] = useState<string>('');
+
+  // Load data from backend on mount
+  useEffect(() => {
+    const loadFileData = async () => {
+      if (!fileId) {
+        setError('No file ID provided');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const data = await QuickScribeAPI.getFileData(parseInt(fileId));
+        setSubtitles(data.subtitles);
+        setSpeakers(data.speakers.length > 0 ? data.speakers : [
+          { id: 1, name: 'Speaker 1', color: '#3B82F6' },
+          { id: 2, name: 'Speaker 2', color: '#8B5CF6' },
+        ]);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to load file data:', err);
+        setError('Failed to load file data');
+        setLoading(false);
+      }
+    };
+
+    loadFileData();
+  }, [fileId]);
 
   // Add to SubtitleEntry interface:
   //   editing?: boolean;
@@ -89,28 +111,6 @@ const VideoSubtitleEditor: React.FC = () => {
       }
     }
   }, [activeSubtitleId]);
-
-  // Speaker state
-  const [speakers, setSpeakers] = useState<Speaker[]>([
-    { id: 1, name: 'Speaker 1', color: '#3B82F6' },
-    { id: 2, name: 'Speaker 2', color: '#8B5CF6' },
-  ]);
-  const [editingSpeaker, setEditingSpeaker] = useState<number | null>(null);
-  const [newSpeakerName, setNewSpeakerName] = useState<string>('');
-
-  // Mock SRT data - in real app, this would come from uploaded file
-  useEffect(() => {
-    const mockSubtitles: SubtitleEntry[] = [
-      { id: 1, startTime: 0, endTime: 3, text1: "Welcome to QuickScribe, the ultimate video subtitle tool.", text2: "QuickScribe में आपका स्वागत है, अंतिम वीडियो सबटाइटल टूल।" },
-      { id: 2, startTime: 3.5, endTime: 7, text1: "Here you can sync your subtitles with precision timing.", text2: "यहाँ आप अपने सबटाइटल्स को सटीक समय के साथ सिंक कर सकते हैं।" },
-      { id: 3, startTime: 7.5, endTime: 12, text1: "The interface is designed to be intuitive and user-friendly.", text2: "इंटरफ़ेस सहज और उपयोगकर्ता के अनुकूल है।" },
-      { id: 4, startTime: 12.5, endTime: 16, text1: "You can edit speaker names and customize the experience.", text2: "आप स्पीकर के नाम संपादित कर सकते हैं और अनुभव को अनुकूलित कर सकते हैं।" },
-      { id: 5, startTime: 16.5, endTime: 20, text1: "Real-time synchronization keeps everything perfectly aligned.", text2: "रीयल-टाइम सिंक्रोनाइज़ेशन सब कुछ पूरी तरह से संरेखित रखता है।" },
-      { id: 6, startTime: 20.5, endTime: 24, text1: "Professional video editing has never been this accessible.", text2: "पेशेवर वीडियो संपादन कभी इतना सुलभ नहीं था।" },
-      { id: 7, startTime: 24.5, endTime: 28, text1: "Export your work when you're satisfied with the results.", text2: "जब आप परिणाम से संतुष्ट हों तो अपना कार्य निर्यात करें।" },
-    ];
-    setSubtitles(mockSubtitles);
-  }, []);
 
   // Video controls
   const togglePlayPause = (): void => {
@@ -217,6 +217,22 @@ const VideoSubtitleEditor: React.FC = () => {
     }
   };
 
+  // Save assignments to backend
+  const saveAssignments = async () => {
+    if (!fileId) {
+      alert('No file ID found');
+      return;
+    }
+
+    try {
+      await QuickScribeAPI.saveFileAssignments(parseInt(fileId), speakers, subtitles);
+      alert('Assignments saved successfully!');
+    } catch (error) {
+      console.error('Failed to save assignments:', error);
+      alert('Failed to save assignments. Please try again.');
+    }
+  };
+
   // Add exportSRT function
   const exportSRT = () => {
     let srt = "";
@@ -254,6 +270,29 @@ const VideoSubtitleEditor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground w-screen relative overflow-hidden">
+      {loading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-foreground">Loading subtitle data...</p>
+          </div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center p-6 bg-card rounded-xl border border-border">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button 
+              onClick={() => router.back()} 
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Decorative gradient blobs */}
       <div className="pointer-events-none select-none">
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-gradient-to-br from-blue-400/30 via-indigo-400/20 to-purple-400/10 blur-3xl opacity-60 dark:from-blue-700/40 dark:via-indigo-700/30 dark:to-purple-700/20 z-0" />
@@ -278,6 +317,12 @@ const VideoSubtitleEditor: React.FC = () => {
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
+              <button
+                className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg"
+                onClick={saveAssignments}
+              >
+                Save Progress
+              </button>
               <button
                 className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 shadow-lg"
                 onClick={exportSRT}
@@ -309,7 +354,7 @@ const VideoSubtitleEditor: React.FC = () => {
               <div
                 key={subtitle.id}
                 id={`subtitle-${subtitle.id}`}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 overflow-hidden transition-transform transition-opacity ${
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 overflow-hidden ${
                   activeSubtitleId === subtitle.id
                     ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-md scale-100 opacity-100'
                     : 'border-border hover:border-blue-300 hover:bg-card/80 scale-95 opacity-70'
