@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { QuickScribeAPI } from "@/lib/api";
 
 interface DragActiveState {
   video: boolean;
@@ -69,6 +70,9 @@ export default function UploadSection() {
 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const subtitleInputRef = useRef<HTMLInputElement>(null);
+
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { control, handleSubmit, watch, setValue } = useForm<FormData>({
     defaultValues: {
@@ -149,20 +153,92 @@ export default function UploadSection() {
     }
   };
 
-  const handleProcess = () => {
-    setIsProcessing(true);
-    setProgress(0);
+  const handleProcess = async () => {
+    if (mode === 'translate') {
+      // Handle translation flow
+      const subtitleFile = watch('subtitle');
+      const language = watch('language');
+      const style = watch('style');
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
+      if (!subtitleFile || !language || !style) {
+        setError('Please fill in all required fields');
+        return;
+      }
+
+      setIsProcessing(true);
+      setProgress(0);
+      setError(null);
+
+      try {
+        // Simulate progress
+        const progressInterval = setInterval(() => {
+          setProgress(prev => {
+            if (prev < 80) return prev + 20;
+            return prev;
+          });
+        }, 500);
+
+        // Call backend API for translation
+        const response = await QuickScribeAPI.translateFile(subtitleFile, language, style);
+        
+        clearInterval(progressInterval);
+        setProgress(100);
+        setSessionId(response.session_id);
+
+        // Store session_id in localStorage for backup
+        localStorage.setItem('session_id', response.session_id);
+
+        setTimeout(() => {
           setIsProcessing(false);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 300);
+        }, 500);
+
+      } catch (error) {
+        console.error('Translation failed:', error);
+        setError('Translation failed. Please try again.');
+        setIsProcessing(false);
+        setProgress(0);
+      }
+
+    } else if (mode === 'assign') {
+      // Handle speaker assignment flow
+      const subtitleFile = watch('subtitle');
+
+      if (!subtitleFile) {
+        setError('Please upload a subtitle file');
+        return;
+      }
+
+      setIsProcessing(true);
+      setProgress(0);
+      setError(null);
+
+      try {
+        // Upload the subtitle file and create session
+        setProgress(25);
+        
+        // For speaker assignment, we use translateFile to create a session
+        // (this will parse the subtitle and create the session in backend)
+        const response = await QuickScribeAPI.translateFile(subtitleFile, 'Hindi', 'Default');
+        
+        setProgress(75);
+        setSessionId(response.session_id);
+        
+        // Store session_id in localStorage
+        localStorage.setItem('session_id', response.session_id);
+        
+        setProgress(100);
+
+        setTimeout(() => {
+          setIsProcessing(false);
+        }, 500);
+
+      } catch (error) {
+        console.error('Upload failed:', error);
+        setError('Upload failed. Please try again.');
+        setIsProcessing(false);
+        setProgress(0);
+      }
+    }
   };
 
   return (
@@ -391,59 +467,18 @@ export default function UploadSection() {
                         </div>
                       </div>
                     )}
+                    {error && (
+                      <div className="pt-4 text-center">
+                        <div className="text-red-500 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                          {error}
+                        </div>
+                      </div>
+                    )}
                   </form>
 ) : mode === 'assign' ? (
                   <form className="w-full space-y-12">
                     <div className="space-y-10 mb-12">
-                      {/* Video Upload */}
-                      <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-pink-600/20 dark:from-purple-400/30 dark:to-pink-500/30 dark:bg-slate-800/50 rounded-xl flex items-center justify-center ring-1 ring-purple-500/20 dark:ring-purple-400/30">
-                            <Video className="w-5 h-5 text-purple-400 dark:text-purple-300" />
-                          </div>
-                          <h2 className="text-xl font-semibold text-foreground dark:text-slate-100">Video File</h2>
-                        </div>
-                        <div
-                          className={`group relative border-2 border-dashed rounded-2xl w-full h-48 flex flex-col items-center justify-center text-center transition-all duration-500 cursor-pointer transform ${dragActive.video ? 'border-purple-400 bg-gradient-to-br from-purple-500/10 to-pink-500/10 scale-[1.02] shadow-lg dark:from-purple-500/30 dark:to-pink-500/30 dark:border-purple-400/80 dark:shadow-purple-500/20' : watch('video') ? 'border-emerald-400 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 shadow-md dark:from-emerald-500/30 dark:to-teal-500/30 dark:border-emerald-400/80 dark:shadow-emerald-500/20' : 'border-border hover:border-purple-400 hover:bg-gradient-to-br hover:from-purple-500/5 hover:to-pink-500/5 hover:shadow-md dark:border-slate-600 dark:hover:border-purple-400/60 dark:hover:from-purple-500/20 dark:hover:to-pink-500/20 dark:hover:shadow-purple-500/10'}`}
-                          onDragEnter={(e) => handleDrag(e, 'video')}
-                          onDragLeave={(e) => handleDrag(e, 'video')}
-                          onDragOver={(e) => handleDrag(e, 'video')}
-                          onDrop={(e) => handleDrop(e, 'video')}
-                          onClick={() => handleUploadClick('video')}
-                        >
-                          <input
-                            ref={videoInputRef}
-                            type="file"
-                            accept="video/*"
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleFileSelection(file, 'video');
-                            }}
-                            className="hidden"
-                          />
-                          {watch('video') ? (
-                            <div className="space-y-2">
-                              <p className="font-semibold text-foreground truncate max-w-xs mx-auto">{watch('video')?.name}</p>
-                              <p className="text-sm text-muted-foreground font-medium">{formatFileSize(watch('video')?.size || 0)}</p>
-                              <button
-                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                                  e.preventDefault();
-                                  removeFile('video');
-                                }}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl transition-all duration-200"
-                              >
-                                <X className="w-4 h-4" /> Remove
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <p className="text-foreground font-medium">Drop your video file here, or click to browse</p>
-                              <p className="text-sm text-muted-foreground">Supports MP4, AVI, MOV and other video formats</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
+                      
                       {/* Subtitle Upload */}
                       <div>
                         <div className="flex items-center gap-3 mb-2">
@@ -498,10 +533,10 @@ export default function UploadSection() {
                     <div className="text-center space-y-8">
                       <button
                         onClick={handleProcess}
-                        disabled={!watch('video') || !watch('subtitle')}
+                        disabled={!watch('subtitle')}
                         className={cn(
                           "group relative cursor-pointer px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-500 transform",
-                          (watch('video') && watch('subtitle'))
+                          watch('subtitle')
                             ? "bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-purple-600 hover:via-pink-600 hover:to-purple-600 dark:shadow-purple-500/30 dark:hover:shadow-purple-500/50 dark:from-purple-600 dark:via-pink-600 dark:to-purple-600"
                             : "bg-gradient-to-r from-muted to-muted/50 text-muted-foreground cursor-not-allowed dark:from-slate-700 dark:to-slate-600 dark:text-slate-400"
                         )}
@@ -511,21 +546,21 @@ export default function UploadSection() {
                           Assign Speakers
                           <div
                             className={`w-2 h-2 rounded-full ${
-                              (watch('video') && watch('subtitle'))
+                              watch('subtitle')
                                 ? 'bg-white animate-pulse'
                                 : 'bg-muted-foreground'
                             }`}
                           ></div>
                         </span>
-                        {(watch('video') && watch('subtitle')) && (
+                        {(watch('subtitle')) && (
                           <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         )}
                       </button>
-                      {(!watch('video') || !watch('subtitle')) && (
+                      {(!watch('subtitle')) && (
                         <div className="flex items-center justify-center gap-2 text-muted-foreground">
                           <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"></div>
                           <p className="text-sm font-medium">
-                            Please upload both video and subtitle files to continue
+                            Please upload a subtitle file to continue
                           </p>
                           <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"></div>
                         </div>
@@ -549,14 +584,27 @@ export default function UploadSection() {
                       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] dark:bg-black/80">
                         <div className="bg-card/80 rounded-2xl shadow-2xl p-8 flex flex-col items-center dark:bg-card/90 dark:border dark:border-border/50">
                           <div className="flex items-center gap-2 text-purple-400 text-md pt-4">
-                            <CheckCircle className="w-8 h-8" /> Speaker assignment complete!{' '}
+                            <CheckCircle className="w-8 h-8" /> File uploaded successfully!{' '}
                           </div>
                           <button
                             className="group relative px-15 py-5 mt-4 rounded-2xl font-semibold text-lg transition-all duration-100 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 text-white shadow-xl hover:shadow-2xl hover:scale-[1.02] hover:from-purple-600 hover:via-pink-600 hover:to-purple-600"
-                            onClick={() => router.push('/editor')}
+                            onClick={() => {
+                              if (sessionId) {
+                                router.push(`/speaker?session_id=${sessionId}`);
+                              } else {
+                                setError('Session ID not found. Please try again.');
+                              }
+                            }}
                           >
-                            Move to Editor
+                            Assign Speakers
                           </button>
+                        </div>
+                      </div>
+                    )}
+                    {error && (
+                      <div className="pt-4 text-center">
+                        <div className="text-red-500 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+                          {error}
                         </div>
                       </div>
                     )}

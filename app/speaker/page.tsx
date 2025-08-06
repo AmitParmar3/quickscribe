@@ -6,6 +6,8 @@ import { useTheme } from "next-themes";
 import Aurora from "@/src/blocks/Backgrounds/Aurora/Aurora";
 import { Edit3, Save, Plus, X, MicVocal, Download } from 'lucide-react';
 import { saveAs } from "file-saver";
+import { useSearchParams } from 'next/navigation';
+import { QuickScribeAPI } from "@/lib/api";
 
 interface SubtitleEntry {
   id: number;
@@ -25,7 +27,9 @@ interface Speaker {
 
 export default function SpeakerPage() {
   const { theme, resolvedTheme } = useTheme();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [subtitles, setSubtitles] = useState<SubtitleEntry[]>([]);
   const [activeSubtitleId, setActiveSubtitleId] = useState<number | null>(null);
   const [selectedLine, setSelectedLine] = useState<SubtitleEntry | null>(null);
@@ -49,8 +53,28 @@ export default function SpeakerPage() {
     setMounted(true);
   }, []);
 
-  // Mock SRT data - in real app, this would come from uploaded file
+  // Get session ID and load data
   useEffect(() => {
+    const urlSessionId = searchParams.get('session_id');
+    const storedSessionId = localStorage.getItem('session_id');
+    
+    const finalSessionId = urlSessionId || storedSessionId;
+    
+    if (finalSessionId) {
+      setSessionId(finalSessionId);
+      localStorage.setItem('session_id', finalSessionId); // Backup storage
+      
+      // TODO: Load speakers and subtitles from backend using session_id
+      // For now, we'll still use mock data but with session awareness
+      loadMockData();
+    } else {
+      console.error('No session ID found');
+      // TODO: Redirect back to upload page or show error
+    }
+  }, [searchParams]);
+
+  // Mock SRT data - will be replaced with API call
+  const loadMockData = () => {
     const mockSubtitles: SubtitleEntry[] = [
       { id: 1, startTime: 0, endTime: 3, text1: "Hello, welcome to our presentation today.", text2: "नमस्ते, आज हमारे प्रेजेंटेशन में आपका स्वागत है।" },
       { id: 2, startTime: 3.5, endTime: 7, text1: "Thank you for joining us.\nI'm excited to be here.", text2: "हमसे जुड़ने के लिए धन्यवाद।\nमैं यहाँ होने के लिए उत्साहित हूँ।" },
@@ -64,7 +88,7 @@ export default function SpeakerPage() {
       { id: 10, startTime: 36.5, endTime: 40, text1: "Thank you for your attention.\nAny questions?\nYes, I have one.", text2: "आपके ध्यान के लिए धन्यवाद।\nकोई सवाल?\nहाँ, मेरे पास एक है।" },
     ];
     setSubtitles(mockSubtitles);
-  }, []);
+  };
 
   // When subtitle is selected, scroll to it
   useEffect(() => {
@@ -186,8 +210,20 @@ export default function SpeakerPage() {
     }
   };
 
-  // Export SRT function from editor
-  const exportSRT = () => {
+  // Export SRT function with backend integration
+  const exportSRT = async () => {
+    // Save assignments to backend first
+    if (sessionId) {
+      try {
+        await QuickScribeAPI.saveAssignments(sessionId, speakers, subtitles);
+        console.log('Assignments saved to backend successfully');
+      } catch (error) {
+        console.error('Failed to save assignments:', error);
+        // Continue with export even if save fails
+      }
+    }
+
+    // Generate SRT file
     let srt = "";
     let lastSpeakerId: number | undefined = undefined;
     
@@ -286,6 +322,24 @@ export default function SpeakerPage() {
 
   return (
     <main className="relative h-screen w-full flex flex-col bg-background text-foreground overflow-hidden dark:bg-gray-950">
+      {/* Session ID Check */}
+      {!sessionId && mounted && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+            <h2 className="text-xl font-bold mb-4 text-foreground">No Session Found</h2>
+            <p className="text-muted-foreground mb-6">
+              Please upload a file first to start speaker assignment.
+            </p>
+            <button
+              onClick={() => window.history.back()}
+              className="px-6 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl font-medium hover:from-gray-700 hover:to-gray-800 transition-all duration-300"
+            >
+              Go Back to Upload
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header - enhanced with better dark mode styling */}
       <div className="bg-card/80 backdrop-blur-md shadow-lg w-full dark:bg-gray-900/90 dark:shadow-xl dark:shadow-gray-500/5">
         <div className="px-6 py-4">
