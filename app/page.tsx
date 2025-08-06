@@ -1,74 +1,24 @@
 'use client';
 import React from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import GradientText from "@/src/blocks/TextAnimations/GradientText/GradientText";
 import Aurora from "@/src/blocks/Backgrounds/Aurora/Aurora";
 import SplitText from "@/src/blocks/TextAnimations/SplitText/SplitText";
-import AnimatedContent from '@/src/blocks/Animations/AnimatedContent/AnimatedContent';
-const text = "QuickScribe";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import {
-  Upload,
-  Video,
-  FileText,
-  X,
-  Check,
-  Sparkles,
-  LucideLanguages,
-  Drama,
-  Loader2,
-  CheckCircle,
-} from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ChevronDown, ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTheme } from "next-themes";
-
-
-interface DragActiveState {
-  video: boolean;
-  subtitle: boolean;
-}
-
-type FileType = "video" | "subtitle";
-
-type FormData = {
-  video: File | null;
-  subtitle: File | null;
-  language: string;
-  style: string;
-};
-
-const styles = [
-  "Sad",
-  "Royal",
-  "GenZ comedy",
-  "Comedic",
-  "Funny",
-  "Millennial",
-  "Custom",
-];
-
-const languages = [
-  "Hindi",
-  "Spanish",
-  "French",
-  "German",
-  "Japanese",
-  "Korean",
-];
+import UploadSection from "@/components/UploadSection";
 
 export default function Home() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+
+  const scrollToUpload = () => {
+    document.getElementById('upload-section')?.scrollIntoView({ 
+      behavior: 'smooth' 
+    });
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -77,7 +27,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <main className="relative min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground transition-colors">
+    <main className="relative min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground transition-colors overflow-x-hidden">
       {/* Theme Toggle - Top Right */}
       <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
@@ -97,8 +47,8 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-full h-screen pointer-events-none z-0"></div>
       )}
       {/* Landing Content */}
-      <section className="flex flex-1 flex-col items-center justify-center w-full px-4 py-12 sm:py-24">
-      <div className="flex flex-col items-center justify-center w-full min-w-[320px] sm:min-w-[400px] h-full overflow-x-auto">
+      <section className="flex flex-1 flex-col items-center justify-center w-full px-4 py-12 sm:py-24 min-h-screen overflow-visible">
+      <div className="flex flex-col items-center justify-center w-full min-w-[320px] sm:min-w-[400px] h-full overflow-visible">
       <div className="flex flex-col">
         {/* QuickScribe animated text */}
         <SplitText
@@ -125,8 +75,40 @@ export default function Home() {
           Elevating Your Subtitles Through Intelligent Automation.
         </GradientText>
       </div>
+      
+      {/* CTA Button */}
+      <motion.div className="mt-12 mb-8">
+        <motion.button
+          onClick={scrollToUpload}
+          className="px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-3 cursor-pointer"
+          whileHover={{ scale: 1.1, boxShadow: "0 20px 40px rgba(59, 130, 246, 0.3)" }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ 
+            delay: 1.5, 
+            duration: 0.5
+          }}
+        >
+          Get Started
+          <ArrowDown className="w-5 h-5" />
+        </motion.button>
+      </motion.div>
+      
+      {/* Scroll Indicator */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <ChevronDown className="w-6 h-6 text-muted-foreground" />
+      </motion.div>
     </div>
       </section>
+      
+      {/* Upload Section */}
+      <UploadSection />
+      
       {/* Footer */}
       <footer className="w-full py-4 flex justify-center">
         <p className="text-muted-foreground text-sm text-center">
