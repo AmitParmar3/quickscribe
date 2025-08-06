@@ -43,9 +43,6 @@ export default function Home() {
           />
         </div>
       )}
-      {resolvedTheme === "light" && (
-        <div className="absolute top-0 left-0 w-full h-screen pointer-events-none z-0"></div>
-      )}
       {/* Landing Content */}
       <section className="flex flex-1 flex-col items-center justify-center w-full px-4 py-12 sm:py-24 min-h-screen overflow-visible">
       <div className="flex flex-col items-center justify-center w-full min-w-[320px] sm:min-w-[400px] h-full overflow-visible">
@@ -53,7 +50,7 @@ export default function Home() {
         {/* QuickScribe animated text */}
         <SplitText
             text="QuickScribe"
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-left leading-tight whitespace-nowrap"
+            className="text-xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-left leading-tight whitespace-nowrap"
             delay={20}
             duration={1.5}
             ease="power3.out"
@@ -86,7 +83,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ 
-            delay: 1.5, 
+            delay: 1.2, 
             duration: 0.5
           }}
         >
